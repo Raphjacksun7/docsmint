@@ -27,7 +27,7 @@ steps:
   - script: pip install uv twine
     displayName: 'Install uv and twine'
 
-  - script: uv pip install -e ".[dev]"
+  - script: uv pip install --system -e ".[dev]"
     displayName: 'Install dependencies'
 
   # ── Lint ─────────────────────────────────────────────────────────────────────
