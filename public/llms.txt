@@ -1,0 +1,331 @@
+# mkdocx
+
+Minimal markdown documentation builder. Static site generator built with Astro, Tailwind CSS, and Pagefind.
+
+Version: 0.1.0
+Install: pip install mkdocx  |  pnpm add mkdocx  |  npm install mkdocx
+
+
+## What mkdocx is
+
+mkdocx turns markdown files into a clean, fast documentation site. It provides:
+- A monospace-first design system (Geist Mono)
+- Full-text search (Pagefind)
+- Syntax highlighting (Shiki, github-dark theme)
+- Light and dark themes
+- A 3-column layout: sidebar, content, table of contents
+- Six built-in components: Callout, Tooltip, FileTree, Tabs, Tab, Image
+- Native collapsible sections via HTML <details>
+
+
+## Project structure
+
+Minimum required files:
+
+  your-project/
+  ├── mkdocx.config.js       site configuration
+  └── src/
+      └── content/
+          ├── docs/          documentation pages (.md or .mdx)
+          └── writing/       dated blog posts (.md or .mdx, optional)
+
+Files in docs/ become /docs/<slug> URLs.
+Files in subdirectories (e.g., docs/guides/foo.md) become /docs/guides/foo.
+Subdirectories create labeled section headers in the left sidebar.
+
+
+## mkdocx.config.js
+
+Full schema:
+
+  export default {
+    name: 'Your Project',            // required — site name, used in <title> and nav
+    description: 'Short summary.',   // required — used in <meta name="description">
+    nav: [                           // optional — top navigation links
+      { label: 'docs', href: '/docs/getting-started' },
+      { label: 'github', href: 'https://github.com/...' },
+    ],
+    footer: [                        // optional — footer links
+      { label: 'License', href: '/license' },
+    ],
+    siteUrl: 'https://your-docs.com', // optional — for sitemaps and canonical URLs
+    dateFormat: { year: 'numeric', month: 'short', day: 'numeric' }, // optional
+    dateLocale: 'en-US',             // optional — BCP 47 locale
+  }
+
+All fields except name and description are optional.
+
+
+## Frontmatter
+
+Docs pages (src/content/docs/):
+
+  ---
+  title: Page title          # required
+  description: Short text.   # optional, for <meta>
+  order: 1                   # optional, sidebar sort position (lower = higher); default: 99
+  ---
+
+Writing posts (src/content/writing/):
+
+  ---
+  title: Post title          # required
+  date: "2026-04-10"         # required, YYYY-MM-DD
+  description: Short text.   # optional
+  author: Name               # optional
+  ---
+
+
+## CLI commands
+
+Node.js (pnpm / npm):
+
+  pnpm dev              start dev server at http://localhost:4321
+  pnpm build            production build to dist/ (Astro + Pagefind)
+  pnpm preview          preview production build at http://localhost:3000
+
+Python (pip install mkdocx):
+
+  mkdocx dev [--port N]    start dev server
+  mkdocx build             production build to dist/
+  mkdocx preview           preview build locally
+  mkdocx deploy <bucket>   build + sync dist/ to GCS bucket via gsutil
+
+The Python CLI auto-detects the project root by walking up from CWD to find mkdocx.config.js.
+
+
+## Build output
+
+  dist/
+  ├── index.html               homepage
+  ├── docs/<slug>/index.html   one file per doc page
+  ├── writing/<slug>/index.html
+  ├── _astro/                  CSS + JS bundles (content-hashed)
+  ├── sitemap.xml
+  └── pagefind/                full-text search index
+
+
+## Components
+
+Components must be imported in .mdx files. They are NOT available in plain .md files (except Image, which replaces <img> automatically, and <details> which is native HTML).
+
+Import syntax (at top of .mdx file):
+
+  import Callout from '../../components/Callout.astro'
+  import Tooltip from '../../components/Tooltip.astro'
+  import FileTree from '../../components/FileTree.astro'
+  import Tabs from '../../components/Tabs.astro'
+  import Tab from '../../components/Tab.astro'
+
+The path depth (../../) depends on the file's location relative to src/content/.
+
+
+### Callout
+
+Renders a bordered notice block. Three types: note (default), warning, tip.
+
+  <Callout>This is a note.</Callout>
+  <Callout type="warning">This action cannot be undone.</Callout>
+  <Callout type="tip">Run dbq check before every deploy.</Callout>
+
+Props:
+  type: "note" | "warning" | "tip"   default: "note"
+
+
+### Tooltip
+
+Inline hover definition. Renders a dotted underline.
+
+  The <Tooltip tip="Definition text here">term</Tooltip> appears inline.
+
+Props:
+  tip: string   required — the definition shown on hover
+
+
+### FileTree
+
+Collapsible file and directory tree. Folders open by default and collapse on click.
+
+  <FileTree>
+  - src/
+    - content/
+      - docs/
+        - **getting-started.md**
+    - components/
+  - mkdocx.config.js
+  </FileTree>
+
+Syntax rules:
+- Two spaces per indent level
+- End directories with /
+- Wrap filenames in **bold** to highlight them
+- Links: add [href="/path"] after a filename (e.g., - index.astro [href="/"])
+
+No props. Slot content is a markdown unordered list.
+
+
+### Tabs
+
+Tabbed panels for showing alternative instructions.
+
+  <Tabs labels={["pnpm", "npm", "pip"]}>
+  <Tab>
+  ```bash
+  pnpm add package
+  ```
+  </Tab>
+  <Tab>
+  ```bash
+  npm install package
+  ```
+  </Tab>
+  <Tab>
+  ```bash
+  pip install package
+  ```
+  </Tab>
+  </Tabs>
+
+Rules:
+- labels array length must equal the number of <Tab> children
+- <Tab> takes no props — slot wrapper only
+- Use Tabs whenever the same action has multiple equivalent paths
+
+Props (Tabs):
+  labels: string[]   required
+
+
+### Image
+
+Drop-in replacement for markdown image syntax. Handles local and remote sources.
+
+  ![Alt text](./local-image.png)            local, optimized at build time
+  ![Alt text](/public-image.png)            served as-is from public/
+  ![Alt text](./arch.png "Caption text")    with caption
+
+Local images (from src/assets/) are resized and converted to WebP/AVIF at build time.
+Public images (from public/) are served with lazy loading, no processing.
+
+Props:
+  src: string | ImageMetadata   required
+  alt: string                   required
+  width: number                 optional
+  height: number                optional
+  caption: string               optional
+
+
+### Collapsible sections
+
+Native HTML. Works in .md and .mdx files. No import needed.
+
+  <details>
+  <summary>Section title</summary>
+
+  Content here. Markdown works: code blocks, tables, lists.
+
+  </details>
+
+Start expanded with the open attribute:
+
+  <details open>
+  <summary>Expanded by default</summary>
+  ...
+  </details>
+
+Use for: long terminal output, optional reading, troubleshooting steps.
+
+
+## Writing conventions
+
+Style: precise, minimal, no filler.
+
+- Short sentences. Each one carries weight.
+- Remove "you can", "this allows you to", "in order to".
+- Active voice. Present tense.
+- Lead with what something is, not how to use it.
+- One blank line between paragraphs in markdown.
+
+Heading hierarchy:
+  #    reserved — injected from frontmatter title, do not use in body
+  ##   top-level sections
+  ###  subsections
+  #### avoid — restructure instead
+
+Code blocks: always include a language tag (python, bash, yaml, sql, typescript, etc.).
+
+Nested code fences: use four backticks for the outer fence when content contains triple backticks.
+
+  ````markdown
+  ```bash
+  inner code block
+  ```
+  ````
+
+
+## Page structure (recommended order)
+
+1. What it is — one paragraph, no setup
+2. Why it exists — skip if obvious from context
+3. Basic usage — simplest working example
+4. Full options / schema — table or annotated examples
+5. Edge cases — only if non-obvious
+6. Related links
+
+
+## File organization
+
+Subdirectories group pages under labeled sidebar sections.
+
+  src/content/docs/
+  ├── getting-started.md    → /docs/getting-started  (no section)
+  ├── configuration.md      → /docs/configuration    (no section)
+  └── guides/
+      ├── custom-theme.md   → /docs/guides/custom-theme   (section: "guides")
+      └── deployment.md     → /docs/guides/deployment     (section: "guides")
+
+Sort order is controlled by the order frontmatter field. Use increments of 10.
+
+
+## Deployment
+
+The build output in dist/ is static HTML. Serve it anywhere.
+
+Node.js:
+  npx serve dist
+
+Docker (nginx):
+  FROM node:22-alpine AS builder
+  WORKDIR /app
+  COPY package*.json ./
+  RUN npm ci
+  COPY . .
+  RUN npm run build
+
+  FROM nginx:alpine
+  COPY --from=builder /app/dist /usr/share/nginx/html
+  EXPOSE 80
+
+Python (GCS):
+  mkdocx deploy gs://your-bucket
+
+GCP Cloud Storage:
+  pnpm build
+  gsutil -m rsync -r -d dist/ gs://your-bucket/
+  gsutil iam ch allUsers:objectViewer gs://your-bucket
+
+
+## Common mistakes
+
+- Using <Tabs> in a .md file (not .mdx) — components require .mdx
+- Nested triple-backtick code fences — use four backticks for the outer fence
+- Using # heading in body content — conflicts with the auto-injected title
+- Forgetting to match labels array length with number of <Tab> children
+- Putting src/assets/ images in public/ (no optimization) or public/ images in src/assets/ (build error)
+
+
+## Performance
+
+Static HTML, no server-side rendering.
+  Lighthouse: 95+
+  FCP: < 500ms
+  Total JS: < 50KB (Pagefind loaded async, only on search open)

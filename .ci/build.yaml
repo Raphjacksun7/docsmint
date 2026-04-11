@@ -1,0 +1,55 @@
+# ── mkdocx CI ──────────────────────────────────────────────────────────────────
+#
+# Push / PR to main:  lint
+# Tag push:           lint → build → publish to PyPI
+#
+# Required secret variable (set in Azure DevOps pipeline settings):
+#   PYPI_TOKEN — PyPI API token with upload scope for the mkdocx project
+
+trigger:
+  branches:
+    include: ['*']
+  tags:
+    include: ['*']
+
+pr:
+  branches:
+    include: [main]
+
+pool: 'Azure Pipelines'
+
+steps:
+
+  # ── Toolchain ────────────────────────────────────────────────────────────────
+
+  - task: UsePythonVersion@0
+    inputs:
+      versionSpec: '3.12'
+    displayName: 'Use Python 3.12'
+
+  - script: pip install uv twine
+    displayName: 'Install uv and twine'
+
+  - script: uv pip install -e ".[dev]"
+    displayName: 'Install dependencies'
+
+  # ── Lint ─────────────────────────────────────────────────────────────────────
+
+  - script: uv run ruff check python/
+    displayName: 'Lint (ruff)'
+
+  # ── Build + publish ───────────────────────────────────────────────────────────
+
+  - script: |
+      sed -i "s/^version = .*/version = \"$(Build.SourceBranchName)\"/" pyproject.toml
+      uv build
+    displayName: 'Build package'
+    condition: and(succeeded(), startsWith(variables['Build.SourceBranch'], 'refs/tags/'))
+
+  - script: |
+      twine upload \
+        --username __token__ \
+        --password $(PYPI_TOKEN) \
+        dist/*.whl dist/*.tar.gz
+    displayName: 'Publish to PyPI'
+    condition: and(succeeded(), startsWith(variables['Build.SourceBranch'], 'refs/tags/'))
