@@ -27,12 +27,12 @@ steps:
   - script: pip install uv twine
     displayName: 'Install uv and twine'
 
-  - script: uv pip install --system -e ".[dev]"
+  - script: uv sync --extra dev
     displayName: 'Install dependencies'
 
   # ── Lint ─────────────────────────────────────────────────────────────────────
 
-  - script: uv run ruff check python/
+  - script: uv run ruff check
     displayName: 'Lint (ruff)'
 
   # ── Build + publish ───────────────────────────────────────────────────────────
