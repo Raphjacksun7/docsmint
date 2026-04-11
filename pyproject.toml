@@ -1,0 +1,25 @@
+[build-system]
+requires = ["setuptools>=68.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "mkdocx"
+version = "0.1.0"
+description = "Minimal markdown documentation builder with a transfa-inspired aesthetic."
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "MIT" }
+keywords = ["docs", "documentation", "markdown", "static-site"]
+dependencies = [
+    "typer>=0.9",
+    "rich>=13.0",
+]
+
+[project.scripts]
+mkdocx = "python.cli:main"
+
+[tool.setuptools.packages.find]
+include = ["python*"]
+
+[tool.setuptools.package-data]
+python = ["py.typed"]

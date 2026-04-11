@@ -1,0 +1,185 @@
+---
+title: Components
+description: Usage and live examples for all built-in components.
+order: 4
+---
+
+import Callout from '../../components/Callout.astro'
+import Tooltip from '../../components/Tooltip.astro'
+import FileTree from '../../components/FileTree.astro'
+import Tabs from '../../components/Tabs.astro'
+import Tab from '../../components/Tab.astro'
+
+Five components ship with mkdocx. Use them in any `.mdx` file. Collapsible sections use native HTML — no import needed.
+
+## Callout
+
+Inline notices for notes, warnings, and tips.
+
+```markdown
+<Callout>Default note.</Callout>
+
+<Callout type="warning">This action cannot be undone.</Callout>
+
+<Callout type="tip">Run dbq check before deploying.</Callout>
+```
+
+<Callout>This is a note. Use it for important context that doesn't fit inline.</Callout>
+
+<Callout type="warning">This action cannot be undone. Back up first.</Callout>
+
+<Callout type="tip">Run `dbq check` before every deploy to catch config errors early.</Callout>
+
+| Prop | Type | Default |
+|------|------|---------|
+| `type` | `"note" \| "warning" \| "tip"` | `"note"` |
+
+## Tooltip
+
+Inline hover definitions. Renders a dotted underline — hover to reveal the tip.
+
+```markdown
+The <Tooltip tip="Batches user operations off-chain before submitting to the EntryPoint">bundler</Tooltip> collects transactions.
+```
+
+The <Tooltip tip="Batches user operations off-chain before submitting to the EntryPoint">bundler</Tooltip> collects transactions.
+
+| Prop | Type | Required |
+|------|------|----------|
+| `tip` | string | yes |
+
+## FileTree
+
+A collapsible file and directory tree. Folders collapse on click.
+
+```markdown
+<FileTree>
+- src/
+  - content/
+    - docs/
+      - **getting-started.md**
+  - components/
+    - Nav.astro
+- mkdocx.config.js
+</FileTree>
+```
+
+<FileTree>
+- src/
+  - content/
+    - docs/
+      - **getting-started.md**
+      - configuration.md
+  - components/
+    - Nav.astro
+    - Search.astro
+- mkdocx.config.js
+- astro.config.mjs
+</FileTree>
+
+Use `**filename**` to highlight a file. Two spaces per indent level. Directories open by default — click to collapse.
+
+No props. Content is the slot.
+
+## Tabs
+
+Tabbed panels for showing alternatives side by side.
+
+````markdown
+<Tabs labels={["pnpm", "npm", "pip"]}>
+<Tab>
+```bash
+pnpm add package
+```
+</Tab>
+<Tab>
+```bash
+npm install package
+```
+</Tab>
+<Tab>
+```bash
+pip install package
+```
+</Tab>
+</Tabs>
+````
+
+<Tabs labels={["pnpm", "npm", "pip"]}>
+<Tab>
+```bash
+pnpm add mkdocx
+```
+</Tab>
+<Tab>
+```bash
+npm install mkdocx
+```
+</Tab>
+<Tab>
+```bash
+pip install mkdocx
+```
+</Tab>
+</Tabs>
+
+`labels` must match the number of `<Tab>` children.
+
+| Prop | Type | Required |
+|------|------|----------|
+| `labels` | `string[]` | yes |
+
+`<Tab>` takes no props. It is a slot wrapper for each panel.
+
+## Image
+
+Optimized images for local and remote sources.
+
+```markdown
+![Architecture diagram](./arch.png)
+![Public image](/diagram.png)
+```
+
+Local images from `src/assets/` are resized and converted to modern formats at build time. Public images from `public/` are served as-is with lazy loading.
+
+Add a caption with the title attribute:
+
+```markdown
+![Diagram](./arch.png "System design overview")
+```
+
+| Prop | Type | Required |
+|------|------|----------|
+| `src` | `string \| ImageMetadata` | yes |
+| `alt` | string | yes |
+| `width` | number | no |
+| `height` | number | no |
+| `caption` | string | no |
+
+## Collapsible sections
+
+Native HTML — no import needed. Works in any `.md` or `.mdx` file.
+
+````html
+<details>
+<summary>Full benchmark output</summary>
+
+```bash
+read: IOPS=749k, BW=2925MiB/s
+clat (usec): min=35, max=8371, avg=337.51
+```
+
+</details>
+````
+
+<details>
+<summary>Full benchmark output</summary>
+
+```bash
+read: IOPS=749k, BW=2925MiB/s (3067MB/s)
+clat (usec): min=35, max=8371, avg=337.51, stdev=27.76
+```
+
+</details>
+
+Add `open` to start expanded. See [Writing content](./writing-content#collapsible-sections) for full usage.

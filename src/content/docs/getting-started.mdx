@@ -1,0 +1,96 @@
+---
+title: Getting started
+description: Install mkdocx and run your first docs site in minutes.
+order: 1
+---
+
+import Tabs from '../../components/Tabs.astro'
+import Tab from '../../components/Tab.astro'
+
+## Installation
+
+<Tabs labels={["pnpm", "npm", "pip"]}>
+<Tab>
+```bash
+pnpm add mkdocx
+```
+</Tab>
+<Tab>
+```bash
+npm install mkdocx
+```
+</Tab>
+<Tab>
+```bash
+pip install mkdocx
+```
+</Tab>
+</Tabs>
+
+## Project structure
+
+Two directories matter. Everything else is generated.
+
+```
+your-project/
+├── mkdocx.config.js
+└── src/
+    └── content/
+        ├── docs/
+        │   └── getting-started.md
+        └── writing/
+            └── first-post.md
+```
+
+`docs/` holds documentation pages. `writing/` holds dated posts. Both are optional — use whichever fits.
+
+## Run locally
+
+<Tabs labels={["pnpm", "npm", "pip"]}>
+<Tab>
+```bash
+pnpm dev
+```
+</Tab>
+<Tab>
+```bash
+npm run dev
+```
+</Tab>
+<Tab>
+```bash
+mkdocx dev
+```
+</Tab>
+</Tabs>
+
+Dev server starts at `http://localhost:4321`. Changes reload instantly.
+
+## Build
+
+<Tabs labels={["pnpm", "npm", "pip"]}>
+<Tab>
+```bash
+pnpm build
+```
+</Tab>
+<Tab>
+```bash
+npm run build
+```
+</Tab>
+<Tab>
+```bash
+mkdocx build
+```
+</Tab>
+</Tabs>
+
+Outputs to `dist/`. Includes syntax highlighting and full-text search indexes.
+
+## Next steps
+
+- [Configuration](./configuration) — site name, nav, footer, dates
+- [Writing content](./writing-content) — markdown, frontmatter, file structure
+- [Components](./components) — Callout, Tooltip, FileTree, Tabs, Image
+- [Deploying](./deploying) — Node.js, Python, Docker, GCP
