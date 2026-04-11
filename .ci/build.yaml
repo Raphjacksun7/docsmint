@@ -24,15 +24,12 @@ steps:
       versionSpec: '3.12'
     displayName: 'Use Python 3.12'
 
-  - script: pip install uv twine
-    displayName: 'Install uv and twine'
-
-  - script: uv sync --extra dev
-    displayName: 'Install dependencies'
+  - script: pip install uv twine ruff
+    displayName: 'Install tools'
 
   # ── Lint ─────────────────────────────────────────────────────────────────────
 
-  - script: uv run ruff check
+  - script: ruff check python/
     displayName: 'Lint (ruff)'
 
   # ── Build + publish ───────────────────────────────────────────────────────────
