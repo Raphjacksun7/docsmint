@@ -1,43 +1,64 @@
-# Astro Starter Kit: Minimal
+# mkdocx
+
+Minimal markdown documentation builder. Write docs in markdown, get a fast static site — no Astro knowledge required.
+
+## Install
 
 ```sh
-npm create astro@latest -- --template minimal
+pip install artifacts-keyring
+pip install mkdocx --index-url https://centiro.pkgs.visualstudio.com/_packaging/Internal_Python/pypi/simple/ --extra-index-url https://pypi.org/simple/
 ```
 
-> 🧑‍🚀 **Seasoned astronaut?** Delete this file. Have fun!
+## Usage
 
-## 🚀 Project Structure
+From your project root:
 
-Inside of your Astro project, you'll see the following folders and files:
-
-```text
-/
-├── public/
-├── src/
-│   └── pages/
-│       └── index.astro
-└── package.json
+```sh
+mkdocx init       # scaffold docs/ in the current project
+mkdocx dev        # start local dev server (localhost:4321)
+mkdocx build      # build for production
+mkdocx preview    # preview the production build
+mkdocx deploy gs://my-bucket  # build and deploy to GCS
+mkdocx clean      # remove the working directory
 ```
 
-Astro looks for `.astro` or `.md` files in the `src/pages/` directory. Each page is exposed as a route based on its file name.
+On first run, mkdocx will offer to scaffold a `docs/` directory if none exists.
 
-There's nothing special about `src/components/`, but that's where we like to put any Astro/React/Vue/Svelte/Preact components.
+## Docs structure
 
-Any static assets, like images, can be placed in the `public/` directory.
+Only two things belong in your repo:
 
-## 🧞 Commands
+```
+docs/
+├── mkdocx.config.js        # site name, nav, footer
+└── src/
+    └── content/
+        └── docs/
+            └── *.md        # your markdown pages
+```
 
-All commands are run from the root of the project, from a terminal:
+The rendering engine (Astro, components, styles) is bundled inside the package and managed automatically.
 
-| Command                   | Action                                           |
-| :------------------------ | :----------------------------------------------- |
-| `npm install`             | Installs dependencies                            |
-| `npm run dev`             | Starts local dev server at `localhost:4321`      |
-| `npm run build`           | Build your production site to `./dist/`          |
-| `npm run preview`         | Preview your build locally, before deploying     |
-| `npm run astro ...`       | Run CLI commands like `astro add`, `astro check` |
-| `npm run astro -- --help` | Get help using the Astro CLI                     |
+## Config
 
-## 👀 Want to learn more?
+```js
+// docs/mkdocx.config.js
+export default {
+  name: 'my-project',
+  description: '',
+  nav: [
+    { label: 'docs', href: '/docs/getting-started' },
+  ],
+  footer: [],
+}
+```
 
-Feel free to check [our documentation](https://docs.astro.build) or jump into our [Discord server](https://astro.build/chat).
+## Page frontmatter
+
+```md
+---
+title: Getting started
+description: Welcome to the docs.
+order: 1
+---
+```
