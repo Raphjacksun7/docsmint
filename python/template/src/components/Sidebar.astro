@@ -31,8 +31,8 @@ const currentPath = Astro.url.pathname.replace(/\/$/, '')
           <li>
             <a
               href={href}
-              class:list={['block py-0.5', currentPath === href ? 'font-bold' : 'text-zinc-500']}
-              style={currentPath === href ? 'text-decoration:none; padding-inline-start:0.5rem' : ''}
+              class:list={['sidebar-link block py-0.5 transition-all text-sm', currentPath === href ? 'font-bold sidebar-active' : 'text-zinc-500']}
+              style={currentPath === href ? 'text-decoration:none; font-size:0.9188rem' : ''}
             >{title}</a>
           </li>
         ))}
