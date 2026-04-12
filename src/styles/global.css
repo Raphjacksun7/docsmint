@@ -276,31 +276,36 @@ a[data-no-hover]:hover {
 }
 
 /* ── Copy button ─────────────────────────────────────────────────────────── */
-pre {
-  position: relative;
-}
-
 .copy-btn {
   position: absolute;
   top: 0.5rem;
   right: 0.5rem;
+  z-index: 10;
   font-family: var(--font-mono);
   font-size: 0.6875rem;
   padding: 0.2rem 0.5rem;
   border-radius: 2px;
   cursor: pointer;
-  border: 1px solid rgba(255,255,255,0.15);
-  background: rgba(255,255,255,0.08);
-  color: rgba(255,255,255,0.5);
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--muted);
   opacity: 0;
-  transition: opacity 0.15s, color 0.15s;
-}
-
-pre:hover .copy-btn {
-  opacity: 1;
+  transition: opacity 0.15s, color 0.15s, background 0.15s;
 }
 
 .copy-btn:hover {
+  color: var(--fg);
+  background: var(--border);
+  border-color: var(--muted);
+}
+
+[data-rehype-pretty-code-figure] .copy-btn {
+  border-color: rgba(255,255,255,0.15);
+  background: rgba(255,255,255,0.08);
+  color: rgba(255,255,255,0.5);
+}
+
+[data-rehype-pretty-code-figure] .copy-btn:hover {
   color: rgba(255,255,255,0.9);
   background: rgba(255,255,255,0.15);
   border-color: rgba(255,255,255,0.3);

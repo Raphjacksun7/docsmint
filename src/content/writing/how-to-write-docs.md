@@ -1,86 +1,98 @@
 ---
 title: How to write documentation that works
 date: "2026-04-11"
-description: The system, the style, and the rules we follow when writing with mkdocx.
-author: mkdocx
+description: Structure, style, and the rules we follow when writing with mkdocx.
+author: Raphael Avocegamou
 ---
 
 ## Structure first
 
-Every page should answer three questions, in order: what is it, why does it exist, how do you use it.
+Every page answers three questions, in order: what is it, why does it exist, how do you use it.
 
-Skip the why if it’s obvious. Never skip the what.
+Skip the why if it's obvious. Never skip the what.
 
-Starting with usage before context forces the reader to reconstruct intent. Most won’t.
-
-If you can’t describe what a page covers in one clear sentence, the page isn’t ready yet.
-
-Files live in `src/content/docs/`. Subdirectories define sidebar sections. Filenames become URLs. Use `kebab-case`.
-
-Use `order` in frontmatter to control position. Increment by 10 to leave room.
+If you can't describe what a page covers in one sentence, the page isn't ready.
 
 ---
 
 ## Write less
 
-Remove anything that doesn’t carry weight.
+Remove anything that doesn't carry weight.
 
-Common patterns to cut:
-“you can”, “this allows you to”, “in order to”, “it’s worth noting”
+Cut: "you can", "this allows you to", "in order to", "it's worth noting", "simply", "just".
 
-What remains is usually the sentence you meant to write.
+What's left is usually the sentence you meant to write.
 
-Short paragraphs. One idea each. Space between them.
-
-Avoid hedging. “Consider” is enough.
+One idea per paragraph. Space between them. No hedging.
 
 ---
 
-## Components have rules
+## Headings are navigation
 
-**Callout** — use when context would be lost inline. Once or twice per page is usually enough.
+Readers scan before they read. Headings are the map.
 
-**Tooltip** — for jargon. Keep it to one sentence.
+Use `##` for sections. `###` for subsections. Never use `#` — mkdocx renders the frontmatter `title` as the page heading.
 
-**FileTree** — show structure. Keep it minimal. Directories open by default.
-
-**Tabs** — for alternatives only (pnpm / npm / pip). Not for structuring content.
-
-**Collapsible** (`<details>`) — for optional or interrupting content. If everything is collapsible, nothing is.
+Make headings specific. "Configuration" is worse than "Configure date format". "Usage" is worse than "Run the dev server".
 
 ---
 
 ## Code blocks always have a language
 
-Every code block should declare its language.
+```python
+def example():
+    return True
+```
 
-If your example includes triple backticks, use four backticks for the outer fence. The parser is literal.
+Not:
+
+```
+def example():
+    return True
+```
+
+The syntax highlighter is there. Use it.
+
+If your example contains triple backticks, use four backticks for the outer fence.
+
+---
+
+## Components have rules
+
+**Callout** — use when the reader would miss something important inline. Once or twice per page.
+
+**Tooltip** — for jargon. One sentence. Not a paragraph.
+
+**Tabs** — for genuine alternatives (pnpm / npm / pip). Not for organizing content.
+
+**FileTree** — show structure. Keep it short. Only what's relevant.
+
+**Collapsible** — for content that interrupts flow. If everything is collapsible, nothing is.
 
 ---
 
 ## The sidebar is a contract
 
-Each item in the sidebar sets an expectation.
+Each entry sets an expectation.
 
-Only include pages that are complete and useful.
-Avoid placeholders — they break trust faster than missing pages.
+Only include pages that are complete. Avoid placeholders — they break trust faster than missing content.
+
+Pages in `docs/` subdirectories appear under section headers. Use this to group related content, not to create hierarchy for its own sake.
 
 ---
 
-## llms.txt
+## LLM context
 
-mkdocx provides a machine-readable reference at `/llms.txt`.
+Run `mkdocx context` from your project root.
 
-It defines components, structure, and conventions.
+It generates `mkdocx-context.md` — the full framework reference plus your project's structure in one file. Paste it into any LLM to generate a complete documentation site.
 
-If you’re using an LLM, point it there first.
-It exists so you don’t have to restate the system each time.
+The LLM knows the components, the frontmatter schema, the writing style. You get back ready-to-deploy markdown.
 
 ---
 
 Good documentation teaches.
 
-It helps readers understand what to do.
-It helps systems understand how to do it.
+It helps people understand what to do and why it works.
 
-The goal is the same.
+The goal is always the same: the reader leaves knowing more than they arrived with, and trusting that what they read was true.

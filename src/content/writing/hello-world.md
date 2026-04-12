@@ -7,14 +7,32 @@ description: We needed documentation worth reading. So we built it.
 
 We had documentation. It worked.
 
-But we wanted to explore a better reading experience—one that makes engaging with documentation feel deliberate, even desirable. Something you don’t just tolerate, but return to.
+The build ran. The pages rendered. The content was there.
 
-Not because you have to. Because it reads right.
+But reading it felt like work. Not because the content was bad — because the experience was indifferent. Generic theme. Distracting chrome. A layout that could have been anyone's.
 
-What we were looking for wasn’t more features. It was clarity.
+We wanted documentation that felt like it belonged to the project.
 
-We wanted documentation that gets out of the way.
-Minimalist, but not empty. Structured, but not rigid.
-A reading experience defined by a good typography, deliberate spacing, and content that holds its place without competing for attention.
+Not a template. Not a theme. A system you don't notice because it stays out of the way.
 
-Good documentation should feel inevitable. 
+---
+
+Minimal by default. Monospace throughout. No sidebar clutter, no floating widgets, no "was this page helpful?" banners.
+
+The reading experience is the feature.
+
+---
+
+mkdocx is what we use now. It takes markdown and returns a fast, clean, searchable static site. The rendering engine is bundled in the pip package. You don't configure Astro. You don't touch the theme. You write.
+
+```bash
+pip install mkdocx
+mkdocx init
+mkdocx dev
+```
+
+That's the whole setup.
+
+---
+
+We're publishing it internally. If you're building something at Centiro and need documentation, this is the tool.

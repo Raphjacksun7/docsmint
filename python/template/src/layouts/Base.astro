@@ -34,12 +34,21 @@ const site = (await import('../../mkdocx.config.js')).default
   <!-- Copy button for code blocks -->
   <script>
     document.querySelectorAll('pre').forEach(pre => {
+      // Wrap pre in a relative container so the button isn't clipped by overflow-x:auto
+      const wrapper = document.createElement('div')
+      wrapper.style.cssText = 'position:relative'
+      pre.parentNode!.insertBefore(wrapper, pre)
+      wrapper.appendChild(pre)
+
       const btn = document.createElement('button')
       btn.textContent = 'copy'
       btn.setAttribute('aria-label', 'Copy code')
       btn.className = 'copy-btn'
-      pre.style.position = 'relative'
-      pre.appendChild(btn)
+      wrapper.appendChild(btn)
+
+      // Show/hide on wrapper hover
+      wrapper.addEventListener('mouseenter', () => { btn.style.opacity = '1' })
+      wrapper.addEventListener('mouseleave', () => { btn.style.opacity = '0' })
 
       btn.addEventListener('click', async () => {
         const code = pre.querySelector('code')
