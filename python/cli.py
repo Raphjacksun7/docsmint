@@ -389,7 +389,7 @@ def context(
     reference = CONTEXT_REFERENCE.read_text().strip()
 
     # Assemble
-    generated = datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
+    generated = datetime.datetime.now(datetime.UTC).strftime("%Y-%m-%d %H:%M UTC")
 
     lines: list[str] = [
         f"# mkdocx context — {name}{version}",
