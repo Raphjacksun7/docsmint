@@ -118,8 +118,8 @@ input.addEventListener('input', async () => {
   debounce = setTimeout(async () => {
     const pf = await loadPagefind()
     if (!pf) {
-      empty.textContent = 'Search unavailable in dev mode — run pnpm build first.'
       results.innerHTML = ''
+      empty.textContent = 'Search unavailable in dev mode — run mkdocx build first.'
       results.appendChild(empty)
       return
     }
@@ -133,9 +133,10 @@ input.addEventListener('input', async () => {
     const items = await Promise.all(search.results.slice(0, 8).map((r: any) => r.data()))
     results.innerHTML = items.map((item: any) => `
       <a href="${item.url}"
-         class="flex flex-col gap-0.5 px-4 py-3 border-b border-zinc-50 last:border-0
-                hover:bg-zinc-50 transition-colors"
-         style="text-decoration:none; color:inherit">
+         class="flex flex-col gap-0.5 px-4 py-3 transition-colors"
+         style="text-decoration:none; color:inherit; border-bottom:1px solid var(--border)"
+         onmouseover="this.style.background='var(--surface)'"
+         onmouseout="this.style.background=''"
         <span class="text-sm font-bold">${item.meta?.title ?? 'Untitled'}</span>
         <span class="text-xs text-zinc-400 line-clamp-2">${item.excerpt}</span>
       </a>

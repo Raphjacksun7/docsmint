@@ -1,10 +1,10 @@
 ---
 title: Writing content
-description: Markdown, frontmatter fields, and file organization.
+description: Markdown, frontmatter fields, MDX components, and file organization.
 order: 3
 ---
 
-mkdocx uses standard markdown with MDX extensions. Docs live in `src/content/docs/`. Writing (blog posts) lives in `src/content/writing/`.
+mkdocx uses standard markdown with MDX extensions. Docs live in `src/content/docs/`. Writing (blog posts, engineering notes) lives in `src/content/writing/`.
 
 ## Frontmatter
 
@@ -25,8 +25,9 @@ order: 1
 ```yaml
 ---
 title: Post title
-date: "2026-04-10"
+date: "2026-04-11"
 description: Short description.
+author: Raph
 ---
 ```
 
@@ -34,38 +35,58 @@ description: Short description.
 |-------|-------------|---------|
 | `title` | docs, writing | Page heading and browser title |
 | `description` | docs, writing | Meta description |
-| `order` | docs | Sidebar sort position. Lower = first |
-| `date` | writing | Publication date. Determines sort order |
+| `order` | docs | Sidebar sort position. Lower = first. Default: 99 |
+| `date` | writing | Publication date. ISO 8601 (`YYYY-MM-DD`). Determines sort order |
+| `author` | writing | Optional. Displayed below the date |
 
 ## Headings
 
-Use `##` for sections, `###` for subsections. `#` is reserved — mkdocx uses the `title` frontmatter field as the page title.
+Use `##` for sections, `###` for subsections. `#` is reserved — mkdocx renders `title` from frontmatter as the page heading.
 
 ## Code blocks
 
-Wrap in triple backticks with a language tag:
+Fenced blocks with a language tag get syntax highlighting:
 
 ```python
 def greet(name: str) -> str:
     return f"Hello, {name}"
 ```
 
-Supported: `python`, `javascript`, `typescript`, `bash`, `sql`, `yaml`, `go`, `rust`, `json`, and many more.
+Supported languages include `python`, `typescript`, `javascript`, `bash`, `sql`, `yaml`, `go`, `rust`, `json`, `dockerfile`, and [many more](https://shiki.matsu.io/languages).
+
+Inline `code` renders without highlighting — styled as monospace by the theme.
+
+## Diagrams
+
+Use the `<Mermaid>` component in `.mdx` files for flow charts, sequence diagrams, and more:
+
+```mdx
+import Mermaid from '../../components/Mermaid.astro'
+
+<Mermaid code={`
+flowchart LR
+  A[Write markdown] --> B[mkdocx build]
+  B --> C[Static HTML]
+  C --> D[Deploy anywhere]
+`} />
+```
+
+Diagrams re-render automatically when the theme changes (light ↔ dark).
 
 ## Collapsible sections
 
-Use `<details>` and `<summary>` for expandable content. Content starts collapsed by default.
+Native HTML — no import needed in any `.md` or `.mdx` file:
 
 ```html
 <details>
 <summary>Full output</summary>
 
-Your content here. Supports markdown, code blocks, and tables.
+Content here. Supports markdown, code blocks, and tables.
 
 </details>
 ```
 
-Add the `open` attribute to start expanded:
+Add `open` to start expanded:
 
 ```html
 <details open>
@@ -79,11 +100,37 @@ Add the `open` attribute to start expanded:
 </details>
 ```
 
-Use collapsible sections for long outputs, optional reference material, or troubleshooting steps that would interrupt the reading flow.
+## Links
+
+Standard markdown links work as expected:
+
+```markdown
+[Getting started](./getting-started)        <!-- relative doc link -->
+[Writing index](/writing)                   <!-- absolute path -->
+[External](https://example.com)             <!-- opens in new tab automatically -->
+```
+
+External links automatically get `target="_blank" rel="noopener noreferrer"`.
+
+## Images
+
+Place images in `public/` and reference them with absolute paths:
+
+```markdown
+![Architecture diagram](/arch.png)
+```
+
+Or use the `<Image>` component for local optimized images:
+
+```mdx
+import Image from '../../components/Image.astro'
+
+<Image src={import('./arch.png')} alt="Architecture diagram" caption="System overview" />
+```
 
 ## File organization
 
-Files in `src/content/docs/` map directly to URLs. Files in subdirectories create section groups in the sidebar.
+Files in `src/content/docs/` map directly to URLs:
 
 ```
 src/content/docs/
@@ -94,24 +141,6 @@ src/content/docs/
     └── deployment.md      → /docs/guides/deployment
 ```
 
-Pages in subdirectories appear under a labeled section header in the sidebar. A `guides/` directory produces a **guides** section heading above its pages.
+Files in subdirectories appear under a labeled section header in the sidebar. Sort order within each section is controlled by the `order` frontmatter field.
 
-Without subdirectory:
-```
-getting-started
-configuration
-custom-theme
-deployment
-```
-
-With subdirectory:
-```
-getting-started
-configuration
-
-guides
-  custom-theme
-  deployment
-```
-
-Sort order within each section is controlled by the `order` frontmatter field.
+Files in `src/content/writing/` map to `/writing/<slug>` and appear on the writing index sorted by date descending.

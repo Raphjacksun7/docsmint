@@ -4,95 +4,78 @@ description: Install mkdocx and run your first docs site in minutes.
 order: 1
 ---
 
+import Callout from '../../components/Callout.astro'
 import Tabs from '../../components/Tabs.astro'
 import Tab from '../../components/Tab.astro'
 
-## Installation
+## Install
 
-<Tabs labels={["pnpm", "npm", "pip"]}>
-<Tab>
 ```bash
-pnpm add mkdocx
+pip install artifacts-keyring
+pip install mkdocx \
+  --index-url https://centiro.pkgs.visualstudio.com/_packaging/Internal_Python/pypi/simple/ \
+  --extra-index-url https://pypi.org/simple/
 ```
-</Tab>
-<Tab>
+
+<Callout type="note">
+`artifacts-keyring` handles authentication with the internal Azure Artifacts feed automatically.
+</Callout>
+
+## Prerequisites
+
+- Python 3.11+
+- Node.js 18+ and pnpm (or npm) — used internally by mkdocx to run Astro
+
+## Initialize a project
+
+From your project root:
+
 ```bash
-npm install mkdocx
+mkdocx init
 ```
-</Tab>
-<Tab>
-```bash
-pip install mkdocx
-```
-</Tab>
-</Tabs>
 
-## Project structure
-
-Two directories matter. Everything else is generated.
+This creates:
 
 ```
-your-project/
+docs/
 ├── mkdocx.config.js
 └── src/
     └── content/
-        ├── docs/
-        │   └── getting-started.md
-        └── writing/
-            └── first-post.md
+        └── docs/
+            └── getting-started.md
 ```
 
-`docs/` holds documentation pages. `writing/` holds dated posts. Both are optional — use whichever fits.
+## Start the dev server
 
-## Run locally
-
-<Tabs labels={["pnpm", "npm", "pip"]}>
-<Tab>
-```bash
-pnpm dev
-```
-</Tab>
-<Tab>
-```bash
-npm run dev
-```
-</Tab>
-<Tab>
 ```bash
 mkdocx dev
 ```
-</Tab>
-</Tabs>
 
-Dev server starts at `http://localhost:4321`. Changes reload instantly.
+On first run, mkdocx installs Node.js dependencies automatically. The dev server starts at `http://localhost:4321`.
 
-## Build
+## How it works
 
-<Tabs labels={["pnpm", "npm", "pip"]}>
-<Tab>
-```bash
-pnpm build
-```
-</Tab>
-<Tab>
-```bash
-npm run build
-```
-</Tab>
-<Tab>
-```bash
-mkdocx build
-```
-</Tab>
-</Tabs>
+mkdocx is a "fat CLI" — the Astro rendering engine is bundled inside the pip package. Your repo only contains content and config. The CLI:
 
-Outputs to `dist/`. Includes syntax highlighting and full-text search indexes.
+1. Copies the bundled template to `docs/.mkdocx/`
+2. Symlinks your `mkdocx.config.js` and `src/content/` into it
+3. Runs Astro from `docs/.mkdocx/`
+
+You never touch the rendering system. Updates arrive via `pip install --upgrade mkdocx`.
+
+## Commands
+
+| Command | Description |
+|---------|-------------|
+| `mkdocx init` | Scaffold `docs/` in the current project |
+| `mkdocx dev` | Start dev server at `localhost:4321` |
+| `mkdocx build` | Production build → `docs/.mkdocx/dist/` |
+| `mkdocx preview` | Preview the production build locally |
+| `mkdocx clean` | Remove `docs/.mkdocx/` to force a fresh reinstall |
 
 ## Next steps
 
 - [Configuration](./configuration) — site name, nav, footer, dates
-- [Writing content](./writing-content) — markdown, frontmatter, file structure
-- [Components](./components) — Callout, Tooltip, FileTree, Tabs, Image
-- [Deploying](./deploying) — Node.js, Python, Docker, GCP
-
-For conventions and style, read [How to write documentation that works](/writing/how-to-write-docs). For LLM-assisted work, [`/llms.txt`](/llms.txt) covers the full system in one file.
+- [Writing content](./writing-content) — markdown, frontmatter, components
+- [Components](./components) — Callout, Tabs, FileTree, Mermaid, and more
+- [Deploying](./deploying) — Docker, nginx, Azure Static Web Apps

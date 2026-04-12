@@ -4,28 +4,17 @@ description: CLI commands, config schema, frontmatter fields, and component API.
 order: 6
 ---
 
-## CLI
-
-### Node.js
+## CLI commands
 
 ```bash
-pnpm dev              # dev server at http://localhost:4321
-pnpm build            # production build → dist/
-pnpm preview          # preview build at http://localhost:3000
+mkdocx init               # scaffold docs/ in the current project
+mkdocx dev [--port <n>]   # dev server at localhost:4321
+mkdocx build              # production build → docs/.mkdocx/dist/
+mkdocx preview            # preview the production build locally
+mkdocx clean              # remove docs/.mkdocx/ to force reinstall
 ```
 
-Options for `dev`: `--port <n>`, `--host` (expose on network).
-
-### Python
-
-```bash
-mkdocx dev [--port <n>]   # dev server
-mkdocx build              # production build → dist/
-mkdocx preview            # preview build locally
-mkdocx deploy <bucket>    # build + sync to GCS bucket
-```
-
-The CLI walks up from the current directory to find `mkdocx.config.js`.
+The CLI walks up from the current directory to find `docs/mkdocx.config.js`.
 
 ## Config schema
 
@@ -45,22 +34,22 @@ All fields except `name` and `description` are optional.
 
 ## Frontmatter
 
-**Docs:**
+**Docs pages** (`src/content/docs/*.md`):
 
-| Field | Type | Required | Purpose |
-|-------|------|----------|---------|
-| `title` | string | yes | Page heading and browser title |
+| Field | Type | Required | Notes |
+|-------|------|----------|-------|
+| `title` | string | yes | Page heading and `<title>` |
 | `description` | string | no | Meta description |
-| `order` | number | no | Sidebar sort position. Lower = first. Default: 99 |
+| `order` | number | no | Sidebar sort position. Default: 99 |
 
-**Writing:**
+**Writing posts** (`src/content/writing/*.md`):
 
-| Field | Type | Required | Purpose |
-|-------|------|----------|---------|
-| `title` | string | yes | Post heading and browser title |
-| `date` | string (YYYY-MM-DD) | yes | Publication date. Determines sort order |
+| Field | Type | Required | Notes |
+|-------|------|----------|-------|
+| `title` | string | yes | Post heading and `<title>` |
+| `date` | string | yes | ISO 8601 (`YYYY-MM-DD`). Determines sort order |
 | `description` | string | no | Meta description |
-| `author` | string | no | Author name |
+| `author` | string | no | Displayed below the date |
 
 ## Component API
 
@@ -78,9 +67,7 @@ All fields except `name` and `description` are optional.
 
 ### `<FileTree>`
 
-No props. Slot content is a markdown list. Two spaces per indent level. Wrap filenames in `**` to highlight.
-
-Directories (items with nested children) are collapsible on click.
+No props. Slot content is a markdown list. Two spaces per indent level. Wrap filenames in `**` to highlight. Directories collapse on click.
 
 ### `<Tabs labels>`
 
@@ -88,11 +75,19 @@ Directories (items with nested children) are collapsible on click.
 |------|------|----------|
 | `labels` | `string[]` | yes |
 
-`labels` must have the same length as the number of `<Tab>` children.
+`labels` must match the number of `<Tab>` children.
 
 ### `<Tab>`
 
-No props. Slot wrapper for a single tab panel. Must be a direct child of `<Tabs>`.
+No props. Slot wrapper for one tab panel. Must be a direct child of `<Tabs>`.
+
+### `<Mermaid code>`
+
+| Prop | Type | Required |
+|------|------|----------|
+| `code` | string | yes |
+
+Renders Mermaid diagrams client-side. Adapts to light/dark theme automatically.
 
 ### `<Image src alt ...>`
 
@@ -100,16 +95,14 @@ No props. Slot wrapper for a single tab panel. Must be a direct child of `<Tabs>
 |------|------|----------|
 | `src` | `string \| ImageMetadata` | yes |
 | `alt` | string | yes |
+| `caption` | string | no |
 | `width` | number | no |
 | `height` | number | no |
-| `caption` | string | no |
-
-Local images (from `src/assets/`) are optimized at build time. Remote and public images are served as-is with lazy loading.
 
 ## Build output
 
 ```
-dist/
+docs/.mkdocx/dist/
 ├── index.html
 ├── docs/
 │   └── getting-started/
@@ -117,15 +110,25 @@ dist/
 ├── writing/
 │   └── hello-world/
 │       └── index.html
-├── _astro/          ← CSS + JS bundles (content-hashed)
-├── sitemap.xml
-└── pagefind/        ← full-text search index
+├── _astro/              ← CSS + JS bundles (content-hashed)
+├── sitemap-index.xml
+└── pagefind/            ← full-text search index
 ```
 
-## Performance
+## Search
 
-Static HTML served over a global CDN. No server-side rendering.
+Search is powered by [Pagefind](https://pagefind.app). It indexes all built HTML pages. The index is generated automatically during `mkdocx build`.
 
-- Lighthouse: 95+
-- FCP: < 500ms
-- Total JS: < 50KB
+Search is **not available in dev mode** — run `mkdocx build` then `mkdocx preview` to use it.
+
+Press `/` anywhere on the site to open the search dialog.
+
+## Upgrading
+
+```bash
+pip install --upgrade mkdocx \
+  --index-url https://centiro.pkgs.visualstudio.com/_packaging/Internal_Python/pypi/simple/ \
+  --extra-index-url https://pypi.org/simple/
+
+mkdocx clean   # remove cached template, force reinstall on next run
+```
