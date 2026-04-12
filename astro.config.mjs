@@ -34,9 +34,6 @@ export default defineConfig({
   },
   vite: {
     plugins: [tailwindcss()],
-    resolve: {
-      preserveSymlinks: true,
-    },
     build: {
       rollupOptions: {
         external: ['/pagefind/pagefind.js'],

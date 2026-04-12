@@ -34,12 +34,6 @@ export default defineConfig({
   },
   vite: {
     plugins: [tailwindcss()],
-    resolve: {
-      // Content lives in a symlinked directory (docs/src/content → .mkdocx/src/content).
-      // Preserve symlinks so relative component imports resolve via the symlink path,
-      // not the real path — otherwise ../../components/Callout.astro won't resolve.
-      preserveSymlinks: true,
-    },
     build: {
       rollupOptions: {
         external: ['/pagefind/pagefind.js'],
