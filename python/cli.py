@@ -16,6 +16,8 @@ Convention:
 """
 from __future__ import annotations
 
+import datetime
+import json
 import shutil
 import subprocess
 import sys
@@ -35,6 +37,14 @@ console = Console()
 # ── Paths ──────────────────────────────────────────────────────────────────────
 
 TEMPLATE_DIR = Path(__file__).parent / "template"
+CONTEXT_REFERENCE = Path(__file__).parent / "context_reference.md"
+
+# Directories to skip when scanning project source
+_SKIP_DIRS = {
+    ".git", ".mkdocx", "node_modules", "__pycache__", ".venv", "venv",
+    "dist", "build", ".astro", ".cache", "coverage", ".pytest_cache",
+    "mkdocx.egg-info", ".eggs",
+}
 
 DEFAULT_CONFIG = """\
 export default {
@@ -265,6 +275,219 @@ def deploy(bucket: str = typer.Argument(..., help="GCS bucket (e.g. gs://my-docs
     else:
         console.print("  [red]Deploy failed.[/red]")
         raise typer.Exit(1)
+
+
+def _project_meta(cwd: Path) -> dict:
+    """Extract project name and description from pyproject.toml or package.json."""
+    meta = {"name": cwd.name, "description": "", "version": ""}
+
+    pyproject = cwd / "pyproject.toml"
+    if pyproject.exists():
+        text = pyproject.read_text()
+        for line in text.splitlines():
+            if line.startswith("name") and "=" in line:
+                meta["name"] = line.split("=", 1)[1].strip().strip('"').strip("'")
+            elif line.startswith("version") and "=" in line:
+                meta["version"] = line.split("=", 1)[1].strip().strip('"').strip("'")
+            elif line.startswith("description") and "=" in line:
+                meta["description"] = line.split("=", 1)[1].strip().strip('"').strip("'")
+        return meta
+
+    pkg = cwd / "package.json"
+    if pkg.exists():
+        try:
+            data = json.loads(pkg.read_text())
+            meta["name"] = data.get("name", meta["name"])
+            meta["description"] = data.get("description", "")
+            meta["version"] = data.get("version", "")
+        except json.JSONDecodeError:
+            pass
+
+    return meta
+
+
+def _file_tree(root: Path, max_files: int = 120) -> str:
+    """Build a compact file tree string, skipping noise dirs."""
+    lines: list[str] = []
+    count = 0
+
+    def _walk(path: Path, prefix: str = "") -> None:
+        nonlocal count
+        if count >= max_files:
+            return
+        try:
+            entries = sorted(path.iterdir(), key=lambda p: (p.is_file(), p.name))
+        except PermissionError:
+            return
+        for i, entry in enumerate(entries):
+            if entry.name.startswith(".") and entry.name not in {".ci", ".github"}:
+                continue
+            if entry.is_dir() and entry.name in _SKIP_DIRS:
+                continue
+            connector = "└── " if i == len(entries) - 1 else "├── "
+            lines.append(f"{prefix}{connector}{entry.name}{'/' if entry.is_dir() else ''}")
+            count += 1
+            if count >= max_files:
+                lines.append(f"{prefix}    … (truncated)")
+                return
+            if entry.is_dir():
+                extension = "    " if i == len(entries) - 1 else "│   "
+                _walk(entry, prefix + extension)
+
+    _walk(root)
+    return "\n".join(lines)
+
+
+def _read_existing_docs(docs: Path) -> str:
+    """Read existing docs content files if docs/ is initialized."""
+    if not (docs / "mkdocx.config.js").exists():
+        return ""
+
+    parts: list[str] = []
+    config = docs / "mkdocx.config.js"
+    parts.append(f"### docs/mkdocx.config.js\n\n```javascript\n{config.read_text().strip()}\n```")
+
+    content_root = docs / "src" / "content"
+    for md in sorted(content_root.rglob("*.md")) + sorted(content_root.rglob("*.mdx")):
+        rel = md.relative_to(docs.parent)
+        parts.append(f"### {rel}\n\n```markdown\n{md.read_text().strip()}\n```")
+
+    return "\n\n".join(parts)
+
+
+@app.command()
+def context(
+    output: Path = typer.Option(  # noqa: B008
+        None, "--output", "-o", help="Output path (default: mkdocx-context.md)"
+    ),
+):
+    """Generate an LLM context file — paste into your LLM to scaffold docs."""
+    cwd = Path.cwd()
+    out_path = output or (cwd / "mkdocx-context.md")
+
+    meta = _project_meta(cwd)
+    name = meta["name"]
+    version = f" v{meta['version']}" if meta["version"] else ""
+    description = meta["description"]
+
+    # README
+    readme_text = ""
+    for candidate in ["README.md", "readme.md", "README.rst", "README"]:
+        p = cwd / candidate
+        if p.exists():
+            readme_text = p.read_text().strip()
+            break
+
+    # Source tree
+    tree = _file_tree(cwd)
+
+    # Existing docs
+    docs = _find_docs()
+    existing_docs = _read_existing_docs(docs)
+
+    # mkdocx reference
+    reference = CONTEXT_REFERENCE.read_text().strip()
+
+    # Assemble
+    generated = datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
+
+    lines: list[str] = [
+        f"# mkdocx context — {name}{version}",
+        "",
+        f"Generated: {generated}  ",
+        f"Working directory: `{cwd}`",
+        "",
+        "---",
+        "",
+        "## How to use this file",
+        "",
+        "Read everything below. Then generate a complete, ready-to-deploy mkdocx",
+        f"documentation site for **{name}**.",
+        "",
+        "Deliverables:",
+        "",
+        "- `docs/mkdocx.config.js`",
+        "- `docs/src/content/docs/*.md` (or `.mdx` if components are needed)",
+        "- `docs/src/content/writing/*.md` — only if the project has engineering",
+        "  decisions, release notes, or architectural context worth surfacing",
+        "",
+        "Rules:",
+        "",
+        "- Follow the transfa writing style defined in the reference below.",
+        "- Every page must have valid frontmatter (`title`, `description`, `order`).",
+        "- Use components (`Callout`, `Tabs`, `FileTree`, `Mermaid`) where they",
+        "  genuinely improve clarity — not as decoration.",
+        "- Do not invent facts. Base all content on the project context below.",
+        "- Output each file as a fenced code block labelled with its path.",
+        "",
+        "---",
+        "",
+        "## mkdocx framework reference",
+        "",
+        reference,
+        "",
+        "---",
+        "",
+        "## Project context",
+        "",
+        f"**Name:** {name}  ",
+        f"**Description:** {description or '(none)'}  ",
+    ]
+
+    if readme_text:
+        lines += [
+            "",
+            "### README",
+            "",
+            readme_text[:6000] + ("\n\n… (truncated)" if len(readme_text) > 6000 else ""),
+        ]
+
+    lines += [
+        "",
+        "### Source tree",
+        "",
+        "```",
+        tree,
+        "```",
+    ]
+
+    if existing_docs:
+        lines += [
+            "",
+            "### Existing docs",
+            "",
+            existing_docs,
+        ]
+    else:
+        lines += [
+            "",
+            "### Existing docs",
+            "",
+            "(none — docs/ not yet initialized)",
+        ]
+
+    lines += [
+        "",
+        "---",
+        "",
+        "## Output spec",
+        "",
+        f"Generate complete documentation for **{name}**.",
+        "Output every file as a fenced code block with its path as the label.",
+        "Start with `docs/mkdocx.config.js`, then docs pages ordered by `order:`",
+        "frontmatter, then any writing posts.",
+        "",
+        "When done, the user should be able to run `mkdocx dev` and see a complete,",
+        "accurate, production-ready documentation site with no placeholders.",
+    ]
+
+    out_path.write_text("\n".join(lines))
+    console.print()
+    console.print(f"  [green]Generated[/green] {out_path.name}  ({out_path.stat().st_size // 1024} KB)")
+    console.print()
+    console.print(f"  Paste [bold]{out_path.name}[/bold] into your LLM.")
+    console.print(f"  It will generate complete docs for [cyan]{name}[/cyan].")
+    console.print()
 
 
 def main():

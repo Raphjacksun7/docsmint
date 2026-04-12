@@ -25,10 +25,11 @@ mkdocx = "python.cli:main"
 include = ["python*"]
 
 [tool.setuptools.package-data]
-# Bundle the entire Astro template inside the pip package
+# Bundle the entire Astro template and LLM context reference inside the pip package
 python = [
     "template/**/*",
     "template/*",
+    "context_reference.md",
 ]
 
 [tool.ruff]
