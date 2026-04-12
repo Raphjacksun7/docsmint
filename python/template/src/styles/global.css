@@ -257,6 +257,14 @@ a:hover {
   margin-inline: -2px;
 }
 
+/* Search result links — use surface color, no padding-inline shift */
+#search-results a:hover {
+  background: var(--surface) !important;
+  color: inherit !important;
+  padding-inline: 0 !important;
+  margin-inline: 0 !important;
+}
+
 /* Prose links — muted color, no background inversion */
 .prose a:hover {
   color: var(--muted);

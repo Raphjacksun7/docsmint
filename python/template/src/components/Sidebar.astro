@@ -18,7 +18,7 @@ for (const entry of docs) {
 
 const sections = Object.entries(tree).sort(([a], [b]) => a.localeCompare(b))
 for (const [, pages] of sections) pages.sort((a, b) => a.order - b.order)
-const currentPath = Astro.url.pathname
+const currentPath = Astro.url.pathname.replace(/\/$/, '')
 ---
 <nav class="text-sm space-y-6">
   {sections.map(([section, pages]) => (

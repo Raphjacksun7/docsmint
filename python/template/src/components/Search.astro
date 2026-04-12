@@ -135,7 +135,7 @@ input.addEventListener('input', async () => {
       <a href="${item.url}"
          class="flex flex-col gap-0.5 px-4 py-3 transition-colors"
          style="text-decoration:none; color:inherit; border-bottom:1px solid var(--border)"
-         onmouseover="this.style.background='var(--surface)';this.style.paddingInline=''"
+         onmouseover="this.style.background='var(--surface)'"
          onmouseout="this.style.background=''"
         <span class="text-sm font-bold">${item.meta?.title ?? 'Untitled'}</span>
         <span class="text-xs text-zinc-400 line-clamp-2">${item.excerpt}</span>
