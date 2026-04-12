@@ -6,14 +6,43 @@ import sitemap from '@astrojs/sitemap'
 import rehypePrettyCode from 'rehype-pretty-code'
 import rehypeExternalLinks from 'rehype-external-links'
 import { cleanInlineCodeIntegration } from './plugins/clean-inline-code.mjs'
+import path from 'path'
+import fs from 'fs'
+import { fileURLToPath } from 'url'
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url))
+
+/**
+ * Vite plugin — resolves ../../components/* imports from user content files.
+ *
+ * User content lives at docs/src/content/ (real path). When Vite processes
+ * an .mdx file there, it uses the real path. A relative import like
+ * ../../components/Callout.astro resolves to docs/src/components/ which
+ * doesn't exist. This plugin intercepts those and redirects to the template's
+ * own src/components/ — keeping docs/ clean.
+ */
+function mkdocxComponentsResolver() {
+  const templateComponents = path.resolve(__dirname, 'src/components')
+  return {
+    name: 'mkdocx-components-resolver',
+    resolveId(source, importer) {
+      if (!importer || !source.startsWith('.')) return null
+      const match = source.match(/components\/(.+)$/)
+      if (!match) return null
+      const resolved = path.resolve(path.dirname(importer), source)
+      if (!fs.existsSync(resolved)) {
+        const templatePath = path.resolve(templateComponents, match[1])
+        if (fs.existsSync(templatePath)) return templatePath
+      }
+      return null
+    },
+  }
+}
 
 /** @type {import('rehype-pretty-code').Options} */
 const prettyCodeOptions = {
   theme: 'github-dark',
   keepBackground: true,
-  // No defaultLang — inline backticks without a language tag pass through
-  // as plain <code> elements, styled by CSS. Only fenced blocks with an
-  // explicit language (```js, ```bash etc.) get syntax highlighting.
 }
 
 const rehypePlugins = [
@@ -33,7 +62,7 @@ export default defineConfig({
     syntaxHighlight: false,
   },
   vite: {
-    plugins: [tailwindcss()],
+    plugins: [tailwindcss(), mkdocxComponentsResolver()],
     build: {
       rollupOptions: {
         external: ['/pagefind/pagefind.js'],

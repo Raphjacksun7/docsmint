@@ -150,11 +150,6 @@ def _prepare_workdir(docs: Path) -> Path:
     _ensure_symlink(work / "mkdocx.config.js", docs / "mkdocx.config.js")
     _ensure_symlink(work / "src" / "content", docs / "src" / "content")
 
-    # Symlink components back into docs/src/components/ so that MDX files can
-    # import components via relative paths (../../components/Callout.astro).
-    # Vite resolves imports from the real file path (not the symlink), so without
-    # this, ../../components/ would point to docs/src/components/ which doesn't exist.
-    _ensure_symlink(docs / "src" / "components", work / "src" / "components")
 
     # Install Node.js deps if needed
     if not (work / "node_modules").exists():
