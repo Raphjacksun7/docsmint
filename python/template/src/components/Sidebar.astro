@@ -32,7 +32,7 @@ const currentPath = Astro.url.pathname
             <a
               href={href}
               class:list={['block py-0.5', currentPath === href ? 'font-bold' : 'text-zinc-500']}
-              style={currentPath === href ? 'text-decoration:none' : ''}
+              style={currentPath === href ? 'text-decoration:none; padding-inline-start:0.5rem' : ''}
             >{title}</a>
           </li>
         ))}
