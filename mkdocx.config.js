@@ -7,7 +7,7 @@ export default {
     { label: 'writing', href: '/writing' },
   ],
   footer: [
-    { label: 'Code Source', href: 'https://dev.azure.com/Centiro/DataScience/_git/dbq-pipelines' },
+    { label: 'Code Source', href: 'https://centiro.visualstudio.com/Internal%20libraries/_git/mkdocx-builder' },
   ],
   // Date display format. Uses Intl.DateTimeFormat options.
   dateFormat: { year: 'numeric', month: 'short', day: 'numeric' },
