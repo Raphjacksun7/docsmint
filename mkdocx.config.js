@@ -3,7 +3,7 @@ export default {
   name: 'mkdocx',
   description: 'Minimal markdown documentation builder. Write docs. Get a clean site.',
   nav: [
-    { label: 'docs',    href: '/docs/getting-started' },
+    { label: 'docs',    href: '/docs' },
     { label: 'writing', href: '/writing' },
   ],
   footer: [

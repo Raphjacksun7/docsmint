@@ -23,4 +23,5 @@ pnpm-debug.log*
 # jetbrains setting folder
 .idea/
 
-*egg-info__pycache__/
+*.egg-info/
+__pycache__/
